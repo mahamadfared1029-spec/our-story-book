@@ -1,26 +1,50 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --font-cairo: var(--font-cairo, "Cairo", sans-serif);
+  --font-tajawal: var(--font-tajawal, "Tajawal", sans-serif);
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* لوحة الألوان الهادئة والعاطفية - Our Story Book Palette */
+  --bg-primary: #FAF7F2;      /* خلفية عاجية كريمية دافئة */
+  --bg-card: #FFFFFF;         /* بطاقات بيضاء ناعمة */
+  --bg-card-warm: #F4EFEB;    /* بطاقات بدرجة دافئة خفيفة */
+  --bg-subtle: #F6F1EC;       /* خلفيات ثانوية */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --text-main: #2D2321;       /* بني داكن مريح للقراءة بدلاً من الأسود الحاد */
+  --text-muted: #7A6C68;      /* نصوص ثانوية متناسقة */
+  --text-accent: #873E47;     /* لون العناوين والنصوص البارزة */
+
+  --border-light: #EBE3DA;    /* حدود ناعمة وطبيعية */
+  --border-subtle: #F0E9E1;
+
+  --accent-burgundy: #7C2D37; /* خمري دافئ للأزرار الرئيسية */
+  --accent-burgundy-hover: #67222B;
+  --accent-rose: #C47B83;     /* وردي ترابي ناعم */
+  --accent-rose-soft: #F7EBEB; /* وردي خفيف جداً للخلفيات المميزة */
+  --accent-gold: #C09A6B;     /* لمسة ذهبية عتيقة هادئة */
+  --accent-gold-soft: #F9F5EC;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: var(--font-cairo), system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  direction: rtl;
+  text-align: start;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-tajawal), var(--font-cairo), sans-serif;
+}
+
+/* تحسينات التمرير الناعم والتركيز اللمسي وإمكانية الوصول */
+:focus-visible {
+  outline: 2px solid var(--accent-burgundy);
+  outline-offset: 2px;
+}
+
+/* إزالة الأسهم الافتراضية من مدخلات الأرقام والتواريخ لتظهر بشكل أنيق */
+input[type="date"] {
+  direction: rtl;
 }

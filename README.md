@@ -1,36 +1,168 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# كتاب قصتنا — Our Story Book 📖✨
 
-## Getting Started
+> تطبيق ويب خاص وآمن لشخصين مرتبطين لتوثيق قصتهما المشتركة في كتاب رقمي يتطور مع الوقت.
 
-First, run the development server:
+---
 
+## 🌟 رؤية وقيم المشروع
+
+1. **الخصوصية والأمان أولاً**: حماية كاملة على مستوى صفوف قاعدة البيانات (RLS) ومسارات التخزين الخاصة.
+2. **شخصان فقط**: كل كتاب محمي ومخصص لعضوين كحد أقصى، مع فرض ذلك على مستوى قاعدة البيانات (Database Constraints & Triggers).
+3. **العربية وتجربة RTL منذ أول سطر**: دعم كامل لاتجاه اليمين لليسار، خطوط عربية دافئة (Cairo و Tajawal)، وواجهة رومانسية أنيقة مستوحاة من دفاتر الذكريات الفاخرة.
+4. **جودة هندسية حقيقية**: بدون بيانات وهمية أو أزرار شكلية. كل وظيفة مربوطة وتُختبر عمليًا.
+
+---
+
+## 🛠 التقنيات المستخدمة
+
+- **Frontend & Backend**: Next.js 16 (App Router, Server Components, Server Actions)
+- **Language**: TypeScript (Strict Mode)
+- **Styling**: Tailwind CSS مع لوحة ألوان دافئة مخصصة
+- **Database & Auth**: Supabase (PostgreSQL + Supabase Auth + Row Level Security)
+- **Testing**: Vitest للاختبارات الآلية وفحص التشفير وقواعد الأمان
+
+---
+
+## 🚀 دليل التشغيل المحلي (خطوة بخطوة)
+
+### المتطلبات الأساسية
+- Node.js (الإصدار 18 فما فوق، تم التحقق على v22)
+- npm (الإصدار 10 فما فوق)
+- حساب مجاني على [Supabase](https://supabase.com)
+
+---
+
+### الخطوة 1: إعداد قاعدة بيانات Supabase
+
+1. سجل الدخول إلى [supabase.com](https://supabase.com) وأنشئ مشروعًا جديدًا (Project).
+2. من القائمة الجانبية في لوحة تحكم مشروعك، اضغط على **SQL Editor**.
+3. افتح ملف الترحيل الموجود في المشروع:
+   `supabase/migrations/00001_initial_schema.sql`
+4. انسخ محتواه بالكامل والصقه في SQL Editor ثم اضغط **Run**.
+   - سيقوم بإنشاء الجداول: `profiles`, `books`, `book_members`, `invites`.
+   - سيفعل سياسات الأمان الصارمة (RLS).
+   - سينشئ الدوال الذرية الآمنة: `create_book_with_creator` و `accept_book_invite`.
+   - سيفعل قيد منع إضافة أكثر من شريكين (`check_book_members_limit`).
+
+---
+
+### الخطوة 2: ضبط متغيرات البيئة
+
+1. من لوحة تحكم Supabase، اذهب إلى:
+   **Project Settings** ➔ **API**
+2. انسخ:
+   - **Project URL**
+   - **anon public key**
+3. انسخ ملف `.env.example` إلى `.env.local`:
+   ```bash
+   cp .env.example .env.local
+   ```
+4. افتح ملف `.env.local` وضع القيم المنسوخة:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOi...
+   ```
+   > ⚠️ **ملاحظة أمنية هامة**: ملف `.env.local` تم استثناؤه تلقائيًا من Git (`.gitignore`)، إياك ورفعه على GitHub.
+
+---
+
+### الخطوة 3: تشغيل المشروع محليًا
+
+في مجلد المشروع:
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+افتح المتصفح على: [http://localhost:3000](http://localhost:3000)
+
+---
+
+### الخطوة 4: تشغيل الاختبارات الآلية
+
+للتأكد من صحة التشفير، والتحقق من المدخلات، وحدود العضوية:
+```bash
+npm test
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+لفحص الأكواد وقواعد الجودة:
+```bash
+npm run lint
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+للتحقق من البناء الإنتاجي الكامل:
+```bash
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🔒 بنية الأمان والخصوصية (Security Architecture)
 
-To learn more about Next.js, take a look at the following resources:
+- **Row Level Security (RLS)**: كل جدول في قاعدة البيانات لا يمكن قراءته أو التعديل عليه إلا بواسطة أعضاء الكتاب المسجلين فعليًا في `book_members`.
+- **نظام الدعوات المشفر**:
+  - عند إنشاء دعوة، يُولد رمز عشوائي قوي 192-bit عبر Web Crypto API.
+  - يُخزن فقط الـ SHA-256 Hash للرمز في قاعدة البيانات (`code_hash`).
+  - الرابط صالح لمدة 7 أيام ومخصص لاستخدام واحد فقط.
+  - لا يمكن استغلال الرمز لمعرفة أسماء أو بيانات الكتاب قبل الانضمام.
+- **منع العضو الثالث قطعيًا**:
+  - قيد `BEFORE INSERT` Trigger على جدول `book_members` يمنع تجاوز الحد الأقصى (عضوين) حتى في حال محاولة التلاعب بالطلبات المتزامنة (Race Conditions).
+- **الجلسات الآمنة**: استخدام `supabase.auth.getUser()` للتحقق من هوية المستخدم الحقيقية المشفرة بدلاً من الجلسات غير الموثوقة.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📁 بنية ملفات المرحلة الأولى
 
-## Deploy on Vercel
+```
+our-story-book/
+├── src/
+│   ├── actions/
+│   │   ├── auth.ts              # إجراءات الخادم للمصادقة (تسجيل، دخول، خروج)
+│   │   ├── books.ts             # إجراءات الخادم لإنشاء الكتب واسترجاعها
+│   │   └── invites.ts           # إجراءات الخادم لتوليد وقبول الدعوات
+│   ├── app/
+│   │   ├── (auth)/
+│   │   │   ├── login/page.tsx   # صفحة تسجيل الدخول
+│   │   │   ├── signup/page.tsx  # صفحة إنشاء الحساب
+│   │   │   └── layout.tsx       # تخطيط صفحات المصادقة
+│   │   ├── auth/callback/       # نقطة تبادل توكنات المصادقة
+│   │   ├── book/
+│   │   │   ├── create/page.tsx  # صفحة إنشاء كتاب جديد
+│   │   │   └── [id]/page.tsx    # صفحة عرض تفاصيل الكتاب وإدارة الشريك
+│   │   ├── invite/[code]/       # صفحة قبول دعوة الشريك المشفرة
+│   │   ├── layout.tsx           # التخطيط العام (RTL + خطوط Cairo و Tajawal)
+│   │   ├── page.tsx             # الصفحة الرئيسية (عرض الكتب الحقيقية أو الحالة الفارغة)
+│   │   ├── error.tsx            # معالجة الأخطاء
+│   │   ├── not-found.tsx        # صفحة 404
+│   │   └── loading.tsx          # شاشة التحميل
+│   ├── components/
+│   │   ├── books/
+│   │   │   └── invite-manager.tsx # مدير الدعوات ونسخ الرابط
+│   │   └── ui/
+│   │       └── navbar.tsx       # شريط التنقل العلوي المتجاوب
+│   ├── lib/
+│   │   ├── supabase/
+│   │   │   ├── client.ts        # عميل المتصفح
+│   │   │   ├── server.ts        # عميل الخادم مع الكوكيز
+│   │   │   └── middleware.ts    # تجديد الجلسة
+│   │   ├── types/
+│   │   │   └── database.ts      # تعريفات TypeScript الدقيقة
+│   │   └── validations.ts       # التحقق من المدخلات وتجزئة التشفير
+│   └── middleware.ts            # حماية المسارات على مستوى التطبيق
+├── supabase/
+│   └── migrations/
+│       └── 00001_initial_schema.sql # ترحيل قاعدة البيانات وسياسات RLS
+├── tests/
+│   └── validation-and-security.test.ts # اختبارات آلية شاملة
+├── .env.example                 # نموذج متغيرات البيئة الآمن
+├── .gitignore                   # حماية الأسرار وملفات البناء
+└── package.json                 # الحزم وأوامر التشغيل
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🤝 حفظ التغييرات على GitHub (Git Commits)
+
+لحفظ كود المرحلة الأولى في مستودعك:
+```bash
+git add .
+git commit -m "feat: complete phase 1 - app foundation, auth, books, secure invites, and RLS"
+```
