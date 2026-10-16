@@ -72,7 +72,6 @@ export function validateBookInput(input: Partial<BookInput>): ValidationResult<B
     return { success: false, error: "تاريخ بداية القصة غير صالح." };
   }
 
-  // Ensure story start date is not absurdly in the future
   const now = new Date();
   if (parsedDate > now) {
     return { success: false, error: "تاريخ بداية القصة لا يمكن أن يكون في المستقبل." };
@@ -89,9 +88,73 @@ export function validateBookInput(input: Partial<BookInput>): ValidationResult<B
   };
 }
 
+export interface ChapterInput {
+  title: string;
+  event_date: string;
+  body: string;
+}
+
+export function validateChapterInput(input: Partial<ChapterInput>): ValidationResult<ChapterInput> {
+  const title = input.title?.trim() || "";
+  const event_date = input.event_date?.trim() || "";
+  const body = input.body?.trim() || "";
+
+  if (title.length < 2 || title.length > 150) {
+    return { success: false, error: "عنوان الفصل يجب أن يكون بين حرفين و150 حرفًا." };
+  }
+
+  if (!event_date) {
+    return { success: false, error: "تاريخ الحدث أو الذكرى مطلوب." };
+  }
+
+  const parsedDate = new Date(event_date);
+  if (isNaN(parsedDate.getTime())) {
+    return { success: false, error: "تاريخ الحدث غير صالح." };
+  }
+
+  const now = new Date();
+  if (parsedDate > now) {
+    return { success: false, error: "تاريخ الذكرى لا يمكن أن يكون في المستقبل." };
+  }
+
+  if (body.length < 5) {
+    return { success: false, error: "محتوى الفصل يجب أن يحتوي على 5 أحرف على الأقل." };
+  }
+
+  return {
+    success: true,
+    data: {
+      title,
+      event_date,
+      body,
+    },
+  };
+}
+
+export const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+export const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+export const MAX_IMAGES_PER_CHAPTER = 3;
+
+export function validateImageFile(file: { type: string; size: number; name: string }): ValidationResult<boolean> {
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type.toLowerCase())) {
+    return {
+      success: false,
+      error: `نوع الملف (${file.name}) غير مدعوم. الأنواع المسموح بها فقط هي JPG و PNG و WebP.`,
+    };
+  }
+
+  if (file.size > MAX_IMAGE_SIZE_BYTES) {
+    return {
+      success: false,
+      error: `حجم الصورة (${file.name}) يتجاوز الحد الأقصى المسموح به (5 ميجابايت).`,
+    };
+  }
+
+  return { success: true, data: true };
+}
+
 /**
  * Generates a cryptographically strong random token for partner invites.
- * Uses Web Crypto API (supported natively in Node.js 16+ and browsers).
  */
 export function generateInviteCode(): string {
   const bytes = new Uint8Array(24);
@@ -101,7 +164,6 @@ export function generateInviteCode(): string {
 
 /**
  * Calculates SHA-256 hash of the invite token for secure storage.
- * The raw code is never stored in the database.
  */
 export async function hashInviteCode(code: string): Promise<string> {
   const encoder = new TextEncoder();

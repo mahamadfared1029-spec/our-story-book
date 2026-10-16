@@ -7,7 +7,6 @@ export type Json =
   | Json[];
 
 export type Database = {
-  // Allows any other schema if needed
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
   public: {
@@ -123,6 +122,63 @@ export type Database = {
         };
         Relationships: [];
       };
+      chapters: {
+        Row: {
+          id: string;
+          book_id: string;
+          author_id: string;
+          title: string;
+          event_date: string;
+          body: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          book_id: string;
+          author_id: string;
+          title: string;
+          event_date: string;
+          body: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          book_id?: string;
+          author_id?: string;
+          title?: string;
+          event_date?: string;
+          body?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      chapter_images: {
+        Row: {
+          id: string;
+          chapter_id: string;
+          storage_path: string;
+          sort_order: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          chapter_id: string;
+          storage_path: string;
+          sort_order?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          chapter_id?: string;
+          storage_path?: string;
+          sort_order?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -157,6 +213,17 @@ export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Book = Database["public"]["Tables"]["books"]["Row"];
 export type BookMember = Database["public"]["Tables"]["book_members"]["Row"];
 export type Invite = Database["public"]["Tables"]["invites"]["Row"];
+export type Chapter = Database["public"]["Tables"]["chapters"]["Row"];
+export type ChapterImage = Database["public"]["Tables"]["chapter_images"]["Row"];
+
+export interface ChapterImageWithUrl extends ChapterImage {
+  signedUrl?: string;
+}
+
+export interface ChapterWithDetails extends Chapter {
+  images: ChapterImageWithUrl[];
+  authorProfile?: Profile | null;
+}
 
 export interface BookWithMembers extends Book {
   members: Array<{
@@ -166,4 +233,5 @@ export interface BookWithMembers extends Book {
     profile?: Profile | null;
   }>;
   activeInvite?: Invite | null;
+  chapters?: ChapterWithDetails[];
 }
