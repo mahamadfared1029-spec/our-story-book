@@ -26,11 +26,21 @@ export async function createChapterAction(
   const title = formData.get("title") as string;
   const event_date = formData.get("event_date") as string;
   const body = formData.get("body") as string;
+  const is_milestone =
+    formData.get("is_milestone") === "true" ||
+    formData.get("is_milestone") === "on";
+  const milestone_type = (formData.get("milestone_type") as string) || null;
+  const mood_tag = (formData.get("mood_tag") as string) || null;
+  const location = (formData.get("location") as string) || null;
 
   const validation = validateChapterInput({
     title,
     event_date,
     body,
+    is_milestone,
+    milestone_type,
+    mood_tag,
+    location,
   });
 
   if (!validation.success) {
@@ -88,6 +98,10 @@ export async function createChapterAction(
       title: validation.data!.title,
       event_date: validation.data!.event_date,
       body: validation.data!.body,
+      is_milestone: validation.data!.is_milestone ?? false,
+      milestone_type: validation.data!.milestone_type ?? null,
+      mood_tag: validation.data!.mood_tag ?? null,
+      location: validation.data!.location ?? null,
     })
     .select()
     .single();
@@ -158,11 +172,21 @@ export async function updateChapterAction(
   const title = formData.get("title") as string;
   const event_date = formData.get("event_date") as string;
   const body = formData.get("body") as string;
+  const is_milestone =
+    formData.get("is_milestone") === "true" ||
+    formData.get("is_milestone") === "on";
+  const milestone_type = (formData.get("milestone_type") as string) || null;
+  const mood_tag = (formData.get("mood_tag") as string) || null;
+  const location = (formData.get("location") as string) || null;
 
   const validation = validateChapterInput({
     title,
     event_date,
     body,
+    is_milestone,
+    milestone_type,
+    mood_tag,
+    location,
   });
 
   if (!validation.success) {
@@ -186,6 +210,10 @@ export async function updateChapterAction(
       title: validation.data!.title,
       event_date: validation.data!.event_date,
       body: validation.data!.body,
+      is_milestone: validation.data!.is_milestone ?? false,
+      milestone_type: validation.data!.milestone_type ?? null,
+      mood_tag: validation.data!.mood_tag ?? null,
+      location: validation.data!.location ?? null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", chapterId)

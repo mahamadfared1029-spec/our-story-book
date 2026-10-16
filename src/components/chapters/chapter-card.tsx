@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, Edit3, User, X } from "lucide-react";
+import { Calendar, Edit3, User, X, MapPin, Star } from "lucide-react";
 import type { ChapterWithDetails } from "@/lib/types/database";
+import { MILESTONE_TYPES, MOOD_TAGS } from "@/lib/types/database";
 
 interface ChapterCardProps {
   chapter: ChapterWithDetails;
@@ -25,18 +26,57 @@ export function ChapterCard({ chapter, bookId, currentUserId }: ChapterCardProps
   const isAuthor = chapter.author_id === currentUserId;
   const authorName = chapter.authorProfile?.display_name || "شريك القصة";
 
+  const milestoneInfo = chapter.milestone_type
+    ? MILESTONE_TYPES[chapter.milestone_type as keyof typeof MILESTONE_TYPES]
+    : null;
+
+  const moodInfo = chapter.mood_tag
+    ? MOOD_TAGS[chapter.mood_tag as keyof typeof MOOD_TAGS]
+    : null;
+
   return (
-    <article className="bg-white rounded-3xl border border-[#EBE3DA] p-6 sm:p-7 shadow-xs hover:border-[#D48C84]/60 transition-all relative overflow-hidden group">
+    <article
+      className={`bg-white rounded-3xl border p-6 sm:p-7 shadow-xs hover:border-[#D48C84]/60 transition-all relative overflow-hidden group ${
+        chapter.is_milestone
+          ? "border-[#D48C84]/60 ring-1 ring-[#D48C84]/20 bg-gradient-to-b from-white to-[#FAF7F2]/40"
+          : "border-[#EBE3DA]"
+      }`}
+    >
       {/* Top subtle highlight */}
       <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[#7C2D37]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-      {/* Header: Date, Author & Edit */}
-      <div className="flex items-center justify-between gap-3 pb-4 mb-4 border-b border-[#EBE3DA]">
-        <div className="flex flex-wrap items-center gap-3 text-xs text-[#7A6C68]">
+      {/* Header: Date, Author, Badges & Edit */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-[#EBE3DA]">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-[#7A6C68]">
           <div className="flex items-center gap-1.5 font-medium text-[#7C2D37] bg-[#FAF0EE] px-2.5 py-1 rounded-full">
             <Calendar className="w-3.5 h-3.5" />
             <span>{formattedDate}</span>
           </div>
+
+          {chapter.is_milestone && milestoneInfo && (
+            <span
+              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${milestoneInfo.badgeClass}`}
+            >
+              <Star className="w-3 h-3 fill-current" />
+              <span>{milestoneInfo.label}</span>
+            </span>
+          )}
+
+          {moodInfo && (
+            <span
+              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium border ${moodInfo.colorClass}`}
+            >
+              <span>{moodInfo.emoji}</span>
+              <span>{moodInfo.label}</span>
+            </span>
+          )}
+
+          {chapter.location && (
+            <span className="inline-flex items-center gap-1 text-[11px] text-[#7A6C68] bg-[#FAF7F2] border border-[#EBE3DA] px-2 py-0.5 rounded-full">
+              <MapPin className="w-3 h-3 text-[#7C2D37]" />
+              <span>{chapter.location}</span>
+            </span>
+          )}
 
           <div className="flex items-center gap-1.5 text-[11px]">
             <User className="w-3.5 h-3.5 text-[#7A6C68]" />

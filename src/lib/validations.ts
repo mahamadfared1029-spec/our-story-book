@@ -88,16 +88,46 @@ export function validateBookInput(input: Partial<BookInput>): ValidationResult<B
   };
 }
 
+export const VALID_MILESTONE_TYPES = [
+  "first_meet",
+  "proposal",
+  "engagement",
+  "wedding",
+  "trip",
+  "anniversary",
+  "new_home",
+  "special_moment",
+  "other",
+] as const;
+
+export const VALID_MOOD_TAGS = [
+  "romantic",
+  "joyful",
+  "funny",
+  "nostalgic",
+  "cozy",
+  "peaceful",
+  "special",
+] as const;
+
 export interface ChapterInput {
   title: string;
   event_date: string;
   body: string;
+  is_milestone?: boolean;
+  milestone_type?: string | null;
+  mood_tag?: string | null;
+  location?: string | null;
 }
 
 export function validateChapterInput(input: Partial<ChapterInput>): ValidationResult<ChapterInput> {
   const title = input.title?.trim() || "";
   const event_date = input.event_date?.trim() || "";
   const body = input.body?.trim() || "";
+  const is_milestone = Boolean(input.is_milestone);
+  const milestone_type = input.milestone_type?.trim() || null;
+  const mood_tag = input.mood_tag?.trim() || null;
+  const location = input.location?.trim() || null;
 
   if (title.length < 2 || title.length > 150) {
     return { success: false, error: "عنوان الفصل يجب أن يكون بين حرفين و150 حرفًا." };
@@ -121,12 +151,28 @@ export function validateChapterInput(input: Partial<ChapterInput>): ValidationRe
     return { success: false, error: "محتوى الفصل يجب أن يحتوي على 5 أحرف على الأقل." };
   }
 
+  if (is_milestone && milestone_type && !VALID_MILESTONE_TYPES.includes(milestone_type as (typeof VALID_MILESTONE_TYPES)[number])) {
+    return { success: false, error: "نوع المعلم الرئيسي المحدد غير صالح." };
+  }
+
+  if (mood_tag && !VALID_MOOD_TAGS.includes(mood_tag as (typeof VALID_MOOD_TAGS)[number])) {
+    return { success: false, error: "طابع أو شعور الذكرى المحدد غير صالح." };
+  }
+
+  if (location && location.length > 100) {
+    return { success: false, error: "اسم المكان يجب ألا يتجاوز 100 حرف." };
+  }
+
   return {
     success: true,
     data: {
       title,
       event_date,
       body,
+      is_milestone,
+      milestone_type: is_milestone ? milestone_type : null,
+      mood_tag,
+      location,
     },
   };
 }
