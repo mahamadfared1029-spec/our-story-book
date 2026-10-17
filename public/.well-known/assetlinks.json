@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "app.ourstorybook.twa",
+      "package_name": "com.ourstorybook.app",
       "sha256_cert_fingerprints": [
-        "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00"
+        "D3:12:B5:E8:66:3F:63:7D:08:77:8D:7A:60:FE:29:71:0D:83:6A:13:1D:12:D0:2A:20:DE:44:DC:5B:A4:1D:D4"
       ]
     }
   }
