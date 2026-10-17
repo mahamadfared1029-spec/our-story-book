@@ -6,6 +6,7 @@ import {
   Sparkles,
   BookOpen,
   Printer,
+  Settings,
 } from "lucide-react";
 import { getBookDetails } from "@/actions/books";
 import { getBookChaptersWithImages } from "@/actions/chapters";
@@ -67,6 +68,14 @@ export default async function BookPage({ params }: BookPageProps) {
             >
               <Printer className="w-3.5 h-3.5" />
               <span>تصدير PDF / طباعة</span>
+            </Link>
+
+            <Link
+              href={`/book/${book.id}/settings`}
+              className="p-2 rounded-xl bg-white border border-[#EBE3DA] text-[#7A6C68] hover:text-[#7C2D37] hover:bg-[#FAF0EE] transition-all shadow-2xs"
+              title="إعدادات الكتاب"
+            >
+              <Settings className="w-4 h-4" />
             </Link>
 
             <Link

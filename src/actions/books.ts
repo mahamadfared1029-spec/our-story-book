@@ -165,3 +165,122 @@ export async function getBookDetails(bookId: string): Promise<BookWithMembers | 
     return null;
   }
 }
+
+/**
+ * Updates basic book information
+ */
+export async function updateBookAction(
+  bookId: string,
+  prevState: BookActionState | null,
+  formData: FormData
+): Promise<BookActionState> {
+  const name = formData.get("name") as string;
+  const partner1_name = formData.get("partner1_name") as string;
+  const partner2_name = formData.get("partner2_name") as string;
+  const story_start_date = formData.get("story_start_date") as string;
+
+  const validation = validateBookInput({
+    name,
+    partner1_name,
+    partner2_name,
+    story_start_date,
+  });
+
+  if (!validation.success) {
+    return { error: validation.error };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "يجب تسجيل الدخول أولاً." };
+  }
+
+  const { error } = await supabase
+    .from("books")
+    .update({
+      name: validation.data!.name,
+      partner1_name: validation.data!.partner1_name,
+      partner2_name: validation.data!.partner2_name,
+      story_start_date: validation.data!.story_start_date,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", bookId);
+
+  if (error) {
+    console.error("Error updating book:", error);
+    return { error: "فشل تحديث بيانات الكتاب في قاعدة البيانات." };
+  }
+
+  revalidatePath(`/book/${bookId}`);
+  revalidatePath("/");
+  redirect(`/book/${bookId}`);
+}
+
+/**
+ * Permanently deletes a book along with its chapters, images and members
+ */
+export async function deleteBookAction(
+  bookId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { success: false, error: "يجب تسجيل الدخول أولاً." };
+    }
+
+    // Verify user is the creator of the book
+    const { data: book } = await supabase
+      .from("books")
+      .select("created_by")
+      .eq("id", bookId)
+      .single();
+
+    if (!book || book.created_by !== user.id) {
+      return {
+        success: false,
+        error: "فقط منشئ الكتاب يملك صلاحية حذفه نهائيًا.",
+      };
+    }
+
+    // Delete all images associated with chapters of this book from storage
+    const { data: chapters } = await supabase
+      .from("chapters")
+      .select("id")
+      .eq("book_id", bookId);
+
+    if (chapters && chapters.length > 0) {
+      const chapterIds = chapters.map((c) => c.id);
+      const { data: chapterImages } = await supabase
+        .from("chapter_images")
+        .select("storage_path")
+        .in("chapter_id", chapterIds);
+
+      if (chapterImages && chapterImages.length > 0) {
+        const paths = chapterImages.map((img) => img.storage_path);
+        await supabase.storage.from("chapter-images").remove(paths);
+      }
+    }
+
+    // Delete the book row (cascade deletes book_members, chapters, invites, etc.)
+    const { error } = await supabase.from("books").delete().eq("id", bookId);
+
+    if (error) {
+      return { success: false, error: "فشل حذف الكتاب من قاعدة البيانات." };
+    }
+
+    revalidatePath("/");
+    return { success: true };
+  } catch (err) {
+    console.error("Error in deleteBookAction:", err);
+    return { success: false, error: "حدث خطأ غير متوقع أثناء حذف الكتاب." };
+  }
+}
+
