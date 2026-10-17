@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, Copy, Link as LinkIcon, RefreshCw, ShieldCheck, UserCheck, Users } from "lucide-react";
 import { createPartnerInviteAction } from "@/actions/invites";
 import type { BookWithMembers } from "@/lib/types/database";
+import { useTranslation } from "@/lib/i18n/context";
 
 interface InviteManagerProps {
   book: BookWithMembers;
@@ -11,6 +12,7 @@ interface InviteManagerProps {
 }
 
 export function InviteManager({ book, currentUserId }: InviteManagerProps) {
+  const { dict, locale } = useTranslation();
   const [isGenerating, setIsGenerating] = useState(false);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -27,10 +29,10 @@ export function InviteManager({ book, currentUserId }: InviteManagerProps) {
       if (res.success && res.inviteCode) {
         setInviteCode(res.inviteCode);
       } else {
-        setError(res.error || "تعذر إنشاء رمز الدعوة.");
+        setError(res.error || (locale === "ku" ? "دروستکردنی بەستەری بانگهێشت سەرکەوتوو نەبوو." : locale === "en" ? "Failed to create invite link." : "تعذر إنشاء رمز الدعوة."));
       }
     } catch {
-      setError("حدث خطأ غير متوقع أثناء إنشاء الدعوة.");
+      setError(locale === "ku" ? "هەڵەیەکی چاوەڕواننەکراو ڕوویدا." : locale === "en" ? "An unexpected error occurred." : "حدث خطأ غير متوقع أثناء إنشاء الدعوة.");
     } finally {
       setIsGenerating(false);
     }
@@ -54,10 +56,10 @@ export function InviteManager({ book, currentUserId }: InviteManagerProps) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2 text-sm font-bold text-[#2D2321]">
           <Users className="w-4 h-4 text-[#7C2D37]" />
-          <span>عضوية الكتاب</span>
+          <span>{dict.settings.membersSection}</span>
         </div>
         <span className="text-xs px-2.5 py-1 rounded-full bg-[#FAF0EE] text-[#7C2D37] font-semibold">
-          {memberCount} من 2 أعضاء
+          {locale === "ku" ? `${memberCount} لە ٢ هاوبەش` : locale === "en" ? `${memberCount} of 2 partners` : `${memberCount} من 2 أعضاء`}
         </span>
       </div>
 
@@ -65,7 +67,7 @@ export function InviteManager({ book, currentUserId }: InviteManagerProps) {
       <div className="space-y-2 mb-6">
         {book.members.map((member) => {
           const isCurrentUser = member.user_id === currentUserId;
-          const displayName = member.profile?.display_name || "مستخدم";
+          const displayName = member.profile?.display_name || dict.common.partner;
           return (
             <div
               key={member.user_id}
@@ -80,19 +82,19 @@ export function InviteManager({ book, currentUserId }: InviteManagerProps) {
                     <span>{displayName}</span>
                     {isCurrentUser && (
                       <span className="text-[10px] text-[#7A6C68] font-normal">
-                        (أنت)
+                        {locale === "ku" ? "(تۆ)" : locale === "en" ? "(You)" : "(أنت)"}
                       </span>
                     )}
                   </div>
                   <div className="text-[10px] text-[#7A6C68]">
-                    {member.role === "creator" ? "منشئ الكتاب" : "شريك القصة"}
+                    {member.role === "creator" ? dict.common.creator : dict.common.partner}
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-1 text-[11px] text-[#117A65] font-medium bg-[#E8F8F5] px-2 py-0.5 rounded-md">
                 <UserCheck className="w-3 h-3" />
-                <span>متصل</span>
+                <span>{locale === "ku" ? "بەستراوەتەوە" : locale === "en" ? "Connected" : "متصل"}</span>
               </div>
             </div>
           );
@@ -104,13 +106,17 @@ export function InviteManager({ book, currentUserId }: InviteManagerProps) {
         <div className="p-3.5 rounded-xl bg-[#FAF0EE] border border-[#F2DDD9] flex items-center gap-2.5 text-xs text-[#7C2D37]">
           <ShieldCheck className="w-4 h-4 shrink-0" />
           <span>
-            اكتملت عضوية الكتاب! كلا الشريكين متصلان الآن والذكريات محمية ومشتركة بينكما فقط.
+            {locale === "ku"
+              ? "ئەندامێتی کتێب تەواو بوو! هەردوو هاوبەشەکە بەستراونەتەوە و یادەوەرییەکان بە تەواوی پارێزراون."
+              : locale === "en"
+              ? "Book membership complete! Both partners are connected and all memories are privately secured."
+              : "اكتملت عضوية الكتاب! كلا الشريكين متصلان الآن والذكريات محمية ومشتركة بينكما فقط."}
           </span>
         </div>
       ) : (
         <div className="border-t border-[#EBE3DA] pt-4">
           <div className="text-xs text-[#7A6C68] mb-3 leading-relaxed">
-            لم ينضم شريكك بعد. أنشئ رابط دعوة خاص وآمن وشاركه معه لينضم مباشرة إلى هذا الكتاب.
+            {dict.invites.invitePartnerSub}
           </div>
 
           {error && (
@@ -123,7 +129,7 @@ export function InviteManager({ book, currentUserId }: InviteManagerProps) {
             <div className="space-y-3">
               <div className="p-3 rounded-xl bg-[#F4EFEB] border border-[#EBE3DA] space-y-2">
                 <div className="text-[11px] font-semibold text-[#2D2321]">
-                  رابط الدعوة الخاص بشريكك:
+                  {locale === "ku" ? "بەستەری تایبەتی هاوبەشەکەت:" : locale === "en" ? "Your partner's invite link:" : "رابط الدعوة الخاص بشريكك:"}
                 </div>
                 <div className="flex items-center gap-2">
                   <input
@@ -139,18 +145,18 @@ export function InviteManager({ book, currentUserId }: InviteManagerProps) {
                     {copied ? (
                       <>
                         <Check className="w-3.5 h-3.5" />
-                        <span>تم النسخ</span>
+                        <span>{dict.invites.copied}</span>
                       </>
                     ) : (
                       <>
                         <Copy className="w-3.5 h-3.5" />
-                        <span>نسخ</span>
+                        <span>{dict.invites.copyLink}</span>
                       </>
                     )}
                   </button>
                 </div>
                 <p className="text-[10px] text-[#7A6C68]">
-                  • الرابط صالح لمدة 7 أيام ويُستخدم مرة واحدة فقط لشخص واحد.
+                  • {dict.invites.shareHint}
                 </p>
               </div>
 
@@ -158,7 +164,7 @@ export function InviteManager({ book, currentUserId }: InviteManagerProps) {
                 onClick={() => setInviteCode(null)}
                 className="text-xs text-[#7A6C68] hover:text-[#7C2D37] underline"
               >
-                إخفاء الرابط
+                {locale === "ku" ? "شاردنەوەی بەستەر" : locale === "en" ? "Hide link" : "إخفاء الرابط"}
               </button>
             </div>
           ) : (
@@ -172,7 +178,7 @@ export function InviteManager({ book, currentUserId }: InviteManagerProps) {
               ) : (
                 <LinkIcon className="w-3.5 h-3.5" />
               )}
-              <span>{isGenerating ? "جارٍ إنشاء الرابط..." : "إنشاء رابط دعوة للشريك"}</span>
+              <span>{isGenerating ? dict.invites.generating : dict.invites.generateButton}</span>
             </button>
           )}
         </div>

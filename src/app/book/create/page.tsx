@@ -4,6 +4,8 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { BookPlus, Heart, ArrowRight, Sparkles } from "lucide-react";
 import { createBookAction, type BookActionState } from "@/actions/books";
+import { useTranslation } from "@/lib/i18n/context";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 const initialState: BookActionState = {
   error: null,
@@ -12,6 +14,7 @@ const initialState: BookActionState = {
 
 export default function CreateBookPage() {
   const [state, formAction, isPending] = useActionState(createBookAction, initialState);
+  const { dict, locale } = useTranslation();
 
   // Today's date as max for story_start_date
   const today = new Date().toISOString().split("T")[0];
@@ -25,14 +28,14 @@ export default function CreateBookPage() {
             href="/"
             className="inline-flex items-center gap-2 text-xs font-semibold text-[#7A6C68] hover:text-[#7C2D37] transition-colors"
           >
-            <ArrowRight className="w-4 h-4" />
-            <span>العودة إلى الرئيسية</span>
+            <ArrowRight className={`w-4 h-4 ${locale === "en" ? "rotate-180" : ""}`} />
+            <span>{dict.nav.myBooks}</span>
           </Link>
           <div className="flex items-center gap-2 text-sm font-bold text-[#2D2321]">
             <BookPlus className="w-4 h-4 text-[#7C2D37]" />
-            <span>بدء كتاب جديد</span>
+            <span>{dict.book.createTitle}</span>
           </div>
-          <div className="w-16" /> {/* Balance layout */}
+          <LanguageSwitcher />
         </div>
       </header>
 
@@ -46,10 +49,10 @@ export default function CreateBookPage() {
               <Sparkles className="w-6 h-6" />
             </div>
             <h1 className="text-2xl font-bold text-[#2D2321] tracking-tight">
-              كتاب قصتكما الجديدة
+              {dict.book.createTitle}
             </h1>
             <p className="text-sm text-[#7A6C68] mt-1.5 leading-relaxed">
-              املآ التفاصيل الأساسية لكتابكما. ستتمكنان من دعوة الشريك وإضافة الذكريات بعد الحفظ.
+              {dict.book.createSubtitle}
             </p>
           </div>
 
@@ -65,7 +68,7 @@ export default function CreateBookPage() {
                 htmlFor="name"
                 className="block text-xs font-semibold text-[#2D2321] mb-1.5"
               >
-                عنوان الكتاب أو القصة
+                {dict.book.bookTitleLabel}
               </label>
               <input
                 id="name"
@@ -73,11 +76,11 @@ export default function CreateBookPage() {
                 type="text"
                 required
                 maxLength={100}
-                placeholder="مثال: حكايتنا معًا، أو فصول العمر"
+                placeholder={dict.book.bookTitlePlaceholder}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#EBE3DA] text-[#2D2321] text-sm focus:bg-white focus:border-[#7C2D37] focus:ring-1 focus:ring-[#7C2D37] transition-all outline-hidden"
               />
               <p className="text-[11px] text-[#7A6C68] mt-1">
-                اختر عنوانًا يعبر عنكما وله مكانة خاصة في قلبيكما
+                {locale === "ku" ? "ناونیشانێک هەڵبژێرە کە لە دڵتانەوە بێت و تایبەت بێت بە خۆتان" : locale === "en" ? "Choose a title that speaks to your hearts and feels truly special" : "اختر عنوانًا يعبر عنكما وله مكانة خاصة في قلبيكما"}
               </p>
             </div>
 
@@ -87,7 +90,7 @@ export default function CreateBookPage() {
                   htmlFor="partner1_name"
                   className="block text-xs font-semibold text-[#2D2321] mb-1.5"
                 >
-                  اسم الشريك الأول
+                  {dict.book.partner1Label}
                 </label>
                 <div className="relative">
                   <input
@@ -96,7 +99,7 @@ export default function CreateBookPage() {
                     type="text"
                     required
                     maxLength={50}
-                    placeholder="مثال: يوسف"
+                    placeholder={dict.book.partner1Placeholder}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#EBE3DA] text-[#2D2321] text-sm focus:bg-white focus:border-[#7C2D37] focus:ring-1 focus:ring-[#7C2D37] transition-all outline-hidden"
                   />
                 </div>
@@ -107,7 +110,7 @@ export default function CreateBookPage() {
                   htmlFor="partner2_name"
                   className="block text-xs font-semibold text-[#2D2321] mb-1.5"
                 >
-                  اسم الشريك الثاني
+                  {dict.book.partner2Label}
                 </label>
                 <div className="relative">
                   <input
@@ -116,7 +119,7 @@ export default function CreateBookPage() {
                     type="text"
                     required
                     maxLength={50}
-                    placeholder="مثال: مريم"
+                    placeholder={dict.book.partner2Placeholder}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#EBE3DA] text-[#2D2321] text-sm focus:bg-white focus:border-[#7C2D37] focus:ring-1 focus:ring-[#7C2D37] transition-all outline-hidden"
                   />
                 </div>
@@ -128,7 +131,7 @@ export default function CreateBookPage() {
                 htmlFor="story_start_date"
                 className="block text-xs font-semibold text-[#2D2321] mb-1.5"
               >
-                تاريخ بداية القصة (أول لقاء أو ذكرى خاصة)
+                {dict.book.startDateLabel}
               </label>
               <div className="relative">
                 <input
@@ -141,7 +144,7 @@ export default function CreateBookPage() {
                 />
               </div>
               <p className="text-[11px] text-[#7A6C68] mt-1">
-                سيُستخدم هذا التاريخ لحساب أيام رحلتكما المشتركة
+                {dict.book.startDateHint}
               </p>
             </div>
 
@@ -156,7 +159,7 @@ export default function CreateBookPage() {
                 ) : (
                   <Heart className="w-4 h-4 fill-white/20" />
                 )}
-                <span>{isPending ? "جارٍ حفظ الكتاب..." : "إنشاء الكتاب وحفظ الذكريات"}</span>
+                <span>{isPending ? dict.book.creating : dict.book.submitCreate}</span>
               </button>
             </div>
           </form>

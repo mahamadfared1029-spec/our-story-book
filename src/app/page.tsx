@@ -3,10 +3,15 @@ import { BookOpen, Calendar, Heart, Plus, Sparkles, ArrowLeft, Shield, Users } f
 import { getCurrentUser } from "@/actions/auth";
 import { getUserBooks } from "@/actions/books";
 import { Navbar } from "@/components/ui/navbar";
+import { getDictionary, SUPPORTED_LOCALES } from "@/lib/i18n";
+import { getCurrentLocale } from "@/lib/i18n/server";
 
 export default async function HomePage() {
   const authData = await getCurrentUser();
   const books = authData ? await getUserBooks() : [];
+  const locale = await getCurrentLocale();
+  const dict = getDictionary(locale);
+  const config = SUPPORTED_LOCALES[locale];
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF7F2]">
@@ -20,10 +25,10 @@ export default async function HomePage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-[#EBE3DA]">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-[#2D2321] tracking-tight">
-                  أهلاً بك، {authData.profile.display_name}
+                  {locale === "ku" ? `بەخێربێیت، ${authData.profile.display_name}` : locale === "en" ? `Welcome, ${authData.profile.display_name}` : `أهلاً بك، ${authData.profile.display_name}`}
                 </h1>
                 <p className="text-xs sm:text-sm text-[#7A6C68] mt-1">
-                  دفتر ذكرياتكما المشتركة محفوظ بكل خصوصية وأمان
+                  {dict.common.tagline}
                 </p>
               </div>
 
@@ -32,33 +37,33 @@ export default async function HomePage() {
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#7C2D37] text-white text-xs font-semibold hover:bg-[#67222B] transition-all shadow-xs shrink-0"
               >
                 <Plus className="w-4 h-4" />
-                <span>بدء كتاب جديد</span>
+                <span>{dict.nav.newBook}</span>
               </Link>
             </div>
 
             {/* Books List or Empty State */}
             {books.length === 0 ? (
-              /* Required Empty State */
+              /* Empty State */
               <div className="bg-white rounded-3xl border border-[#EBE3DA] p-10 sm:p-16 text-center max-w-lg mx-auto shadow-xs">
                 <div className="w-16 h-16 rounded-full bg-[#FAF0EE] text-[#7C2D37] mx-auto flex items-center justify-center mb-5">
                   <Heart className="w-8 h-8 fill-[#7C2D37]/20" />
                 </div>
                 <h2 className="text-xl font-bold text-[#2D2321] mb-2">
-                  ابدآ أول فصل من قصتكما
+                  {dict.book.emptyChaptersTitle}
                 </h2>
                 <p className="text-xs sm:text-sm text-[#7A6C68] leading-relaxed max-w-sm mx-auto mb-6">
-                  لم تقوما بإنشاء كتاب ذكرياتكما بعد. ابدآ الآن بتوثيق أول يوم وادعُ شريكك لمشاركتك الرحلة.
+                  {dict.home.emptyBooksSub}
                 </p>
                 <Link
                   href="/book/create"
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#7C2D37] text-white text-xs font-semibold hover:bg-[#67222B] transition-all shadow-xs"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>إنشاء كتابكما الأول</span>
+                  <span>{dict.home.createFirstBook}</span>
                 </Link>
               </div>
             ) : (
-              /* Real Books Grid (No Mock Data) */
+              /* Real Books Grid */
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {books.map((book) => {
                   const startDate = new Date(book.story_start_date);
@@ -66,7 +71,8 @@ export default async function HomePage() {
                   const diffDays = Math.ceil(
                     Math.abs(now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
                   );
-                  const formattedDate = startDate.toLocaleDateString("ar-EG", {
+                  const dateLocale = locale === "en" ? "en-US" : locale === "ku" ? "ckb" : "ar-EG";
+                  const formattedDate = startDate.toLocaleDateString(dateLocale, {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
@@ -86,7 +92,7 @@ export default async function HomePage() {
                             {book.partner1_name} &amp; {book.partner2_name}
                           </span>
                           <span className="text-[#C09A6B] font-medium text-[11px]">
-                            {diffDays} يومًا
+                            {diffDays} {dict.common.day}
                           </span>
                         </div>
 
@@ -96,13 +102,17 @@ export default async function HomePage() {
 
                         <div className="flex items-center gap-1.5 text-xs text-[#7A6C68]">
                           <Calendar className="w-3.5 h-3.5 text-[#7C2D37]" />
-                          <span>بداية القصة: {formattedDate}</span>
+                          <span>
+                            {locale === "ku" ? `دەستپێک: ${formattedDate}` : locale === "en" ? `Start date: ${formattedDate}` : `بداية القصة: ${formattedDate}`}
+                          </span>
                         </div>
                       </div>
 
                       <div className="mt-6 pt-4 border-t border-[#EBE3DA] flex items-center justify-between text-xs font-semibold text-[#7C2D37]">
-                        <span>فتح الكتاب والذكريات</span>
-                        <ArrowLeft className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" />
+                        <span>
+                          {locale === "ku" ? "کردنەوەی کتێب و یادەوەرییەکان" : locale === "en" ? "Open Book & Memories" : "فتح الكتاب والذكريات"}
+                        </span>
+                        <ArrowLeft className={`w-4 h-4 transform ${config.dir === "rtl" ? "group-hover:-translate-x-1" : "group-hover:translate-x-1 rotate-180"} transition-transform`} />
                       </div>
                     </Link>
                   );
@@ -111,21 +121,21 @@ export default async function HomePage() {
             )}
           </div>
         ) : (
-          /* Public Hero Section (When not logged in) */
+          /* Public Hero Section */
           <div className="max-w-3xl mx-auto text-center space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FAF0EE] text-[#7C2D37] text-xs font-semibold border border-[#F2DDD9]">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>مساحة خاصة وآمنة لشخصين مرتبطين</span>
+              <span>
+                {locale === "ku" ? "شوێنێکی پارێزراو و تایبەت بۆ دوو کەس" : locale === "en" ? "A private and secure space for two partners" : "مساحة خاصة وآمنة لشخصين مرتبطين"}
+              </span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl font-extrabold text-[#2D2321] tracking-tight leading-tight sm:leading-tight">
-              كتاب قصتكما الرقمي..
-              <br />
-              <span className="text-[#7C2D37]">ذكرياتكما تتطور مع الوقت</span>
+              {dict.home.heroTitle}
             </h1>
 
             <p className="text-sm sm:text-base text-[#7A6C68] max-w-xl mx-auto leading-relaxed">
-              وثّقا فصولكما المشتركة، تواريخكما المميزة، وصوركما الأثيرة في كتاب أنيق وهادئ. مخصص لشخصين فقط وبأعلى درجات الخصوصية والأمان.
+              {dict.home.heroSubtitle}
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
@@ -134,13 +144,13 @@ export default async function HomePage() {
                 className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#7C2D37] text-white text-sm font-semibold hover:bg-[#67222B] transition-all shadow-sm flex items-center justify-center gap-2"
               >
                 <Heart className="w-4 h-4 fill-white/20" />
-                <span>ابدآ قصتكما الآن مجانًا</span>
+                <span>{dict.home.startStory}</span>
               </Link>
               <Link
                 href="/login"
                 className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white text-[#2D2321] text-sm font-semibold hover:bg-[#FAF7F2] border border-[#EBE3DA] transition-all flex items-center justify-center"
               >
-                تسجيل الدخول
+                {dict.common.login}
               </Link>
             </div>
 
@@ -151,10 +161,10 @@ export default async function HomePage() {
                   <Shield className="w-5 h-5" />
                 </div>
                 <h3 className="text-sm font-bold text-[#2D2321] mb-1">
-                  خصوصية صارمة
+                  {dict.home.privacyFeature}
                 </h3>
                 <p className="text-xs text-[#7A6C68] leading-relaxed">
-                  حماية متقدمة على مستوى الصفوف (RLS). لا يمكن لأي طرف ثالث الاطلاع على كتابكما.
+                  {dict.home.privacyDesc}
                 </p>
               </div>
 
@@ -163,10 +173,10 @@ export default async function HomePage() {
                   <Users className="w-5 h-5" />
                 </div>
                 <h3 className="text-sm font-bold text-[#2D2321] mb-1">
-                  شريكان فقط
+                  {locale === "ku" ? "تەنیا دوو هاوبەش" : locale === "en" ? "Two Partners Only" : "شريكان فقط"}
                 </h3>
                 <p className="text-xs text-[#7A6C68] leading-relaxed">
-                  نظام دعوة آمن ومشفر يضمن انضمام الشريك بدقة ويمنع أي عضو ثالث قطعيًا.
+                  {locale === "ku" ? "سیستەمێکی بانگهێشتی پارێزراو کە تەنیا هاتنەژوورەوەی هاوبەشەکەت مسۆگەر دەکات و ڕێگری لە هەر ئەندامێکی سێیەم دەکات." : locale === "en" ? "A secure cryptographic invite system ensuring only your partner joins and strictly barring any third person." : "نظام دعوة آمن ومشفر يضمن انضمام الشريك بدقة ويمنع أي عضو ثالث قطعيًا."}
                 </p>
               </div>
 
@@ -175,10 +185,10 @@ export default async function HomePage() {
                   <BookOpen className="w-5 h-5" />
                 </div>
                 <h3 className="text-sm font-bold text-[#2D2321] mb-1">
-                  كتاب رقمي فاخر
+                  {dict.home.printFeature}
                 </h3>
                 <p className="text-xs text-[#7A6C68] leading-relaxed">
-                  تصميم عربي أصيل هادئ ودافئ يحاكي دفاتركما المفضلة بعيدًا عن صخب منصات التواصل.
+                  {dict.home.printDesc}
                 </p>
               </div>
             </div>
@@ -188,7 +198,7 @@ export default async function HomePage() {
 
       {/* Footer */}
       <footer className="border-t border-[#EBE3DA] py-6 text-center text-xs text-[#7A6C68]">
-        كتاب قصتنا — Our Story Book &copy; {new Date().getFullYear()} • صُمم بكل حب وعناية
+        {dict.common.appName} &copy; {new Date().getFullYear()} • {locale === "ku" ? "بە خۆشەویستی و خەمخۆری دروستکراوە" : locale === "en" ? "Crafted with love and care" : "صُمم بكل حب وعناية"}
       </footer>
     </div>
   );

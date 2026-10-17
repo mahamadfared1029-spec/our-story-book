@@ -14,6 +14,7 @@ import type { ChapterWithDetails } from "@/lib/types/database";
 import { groupChaptersByYear } from "@/lib/timeline";
 import { TimelineNode } from "./timeline-node";
 import { ChapterCard } from "@/components/chapters/chapter-card";
+import { useTranslation } from "@/lib/i18n/context";
 
 interface StoryTimelineProps {
   chapters: ChapterWithDetails[];
@@ -29,6 +30,7 @@ export function StoryTimeline({
   const [viewMode, setViewMode] = useState<"timeline" | "cards">("timeline");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [onlyMilestones, setOnlyMilestones] = useState<boolean>(false);
+  const { dict, locale } = useTranslation();
 
   // Filter chapters
   const filteredChapters = onlyMilestones
@@ -46,17 +48,17 @@ export function StoryTimeline({
           <Sparkles className="w-8 h-8" />
         </div>
         <h3 className="text-lg font-bold text-[#2D2321] mb-2">
-          ابدآ أول فصل من قصتكما
+          {dict.book.emptyChaptersTitle}
         </h3>
         <p className="text-xs sm:text-sm text-[#7A6C68] max-w-md mx-auto leading-relaxed mb-6">
-          الصفحات تنتظر لحظاتكما الجميلة. وثقا أول لقاء، أول سفر، أو تفاصيل يوم لا تريدان نسيانه مع إضافة الصور الخاصة.
+          {dict.book.emptyChaptersSub}
         </p>
         <Link
           href={`/book/${bookId}/chapters/new`}
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#7C2D37] text-white text-sm font-semibold hover:bg-[#67222B] transition-all shadow-xs"
         >
           <Plus className="w-4 h-4" />
-          <span>كتابة أول فصل الآن</span>
+          <span>{dict.book.addFirstChapter}</span>
         </Link>
       </div>
     );
@@ -80,7 +82,7 @@ export function StoryTimeline({
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
-              <span>مخطط زمني</span>
+              <span>{locale === "ku" ? "هێڵی کاتی" : locale === "en" ? "Timeline" : "مخطط زمني"}</span>
             </button>
 
             <button
@@ -93,7 +95,7 @@ export function StoryTimeline({
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
-              <span>بطاقات</span>
+              <span>{locale === "ku" ? "کارتەکان" : locale === "en" ? "Cards" : "بطاقات"}</span>
             </button>
           </div>
 
@@ -112,7 +114,7 @@ export function StoryTimeline({
                 onlyMilestones ? "fill-current" : ""
               }`}
             />
-            <span>المحطات الفارقة فقط</span>
+            <span>{locale === "ku" ? "تەنیا وێستگە تایبەتەکان" : locale === "en" ? "Milestones Only" : "المحطات الفارقة فقط"}</span>
           </button>
         </div>
 
@@ -127,7 +129,9 @@ export function StoryTimeline({
           >
             <ArrowUpDown className="w-3.5 h-3.5 text-[#7C2D37]" />
             <span>
-              {sortOrder === "asc" ? "من الأقدم للأحدث" : "من الأحدث للأقدم"}
+              {sortOrder === "asc"
+                ? locale === "ku" ? "کۆنترین بۆ نوێترین" : locale === "en" ? "Oldest to Newest" : "من الأقدم للأحدث"
+                : locale === "ku" ? "نوێترین بۆ کۆنترین" : locale === "en" ? "Newest to Oldest" : "من الأحدث للأقدم"}
             </span>
           </button>
 
@@ -136,7 +140,7 @@ export function StoryTimeline({
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#7C2D37] text-white text-xs font-semibold hover:bg-[#67222B] transition-all shadow-xs"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>فصل جديد</span>
+            <span>{locale === "ku" ? "بەشی نوێ" : locale === "en" ? "New Chapter" : "فصل جديد"}</span>
           </Link>
         </div>
       </div>
@@ -146,17 +150,21 @@ export function StoryTimeline({
         <div className="bg-white rounded-3xl border border-[#EBE3DA] p-8 text-center shadow-xs">
           <Star className="w-10 h-10 text-[#B9770E] mx-auto mb-3" />
           <h4 className="text-base font-bold text-[#2D2321] mb-1">
-            لا توجد محطات فارقة مسجلة بعد
+            {locale === "ku" ? "تا ئێستا هیچ وێستگەیەکی تایبەت تۆمار نەکراوە" : locale === "en" ? "No milestones recorded yet" : "لا توجد محطات فارقة مسجلة بعد"}
           </h4>
           <p className="text-xs text-[#7A6C68] mb-4">
-            يمكنك تمييز أي فصل كمحطة فارقة (أول لقاء، خطوبة، زفاف، سفر...) أثناء كتابته أو تعديله.
+            {locale === "ku"
+              ? "دەتوانیت هەر بەشێک وەک وێستگەیەکی تایبەت (یەکەم بینین، دەستگیرانداری، هاوسەرگیری، گەشت...) دیاری بکەیت."
+              : locale === "en"
+              ? "You can mark any chapter as a milestone (first meeting, engagement, wedding, travel...) when writing or editing."
+              : "يمكنك تمييز أي فصل كمحطة فارقة (أول لقاء، خطوبة، زفاف، سفر...) أثناء كتابته أو تعديله."}
           </p>
           <button
             type="button"
             onClick={() => setOnlyMilestones(false)}
             className="text-xs font-semibold text-[#7C2D37] hover:underline"
           >
-            إلغاء التصفية وعرض كل الفصول
+            {locale === "ku" ? "لابردنی فلتەر و نیشاندانی هەموو بەشەکان" : locale === "en" ? "Clear filter and show all chapters" : "إلغاء التصفية وعرض كل الفصول"}
           </button>
         </div>
       )}
@@ -169,12 +177,12 @@ export function StoryTimeline({
               {/* Year Marker Badge */}
               <div className="flex items-center gap-3 mb-6">
                 <div className="px-4 py-1.5 rounded-full bg-[#7C2D37] text-white text-xs font-bold shadow-2xs font-sans tracking-wide">
-                  عام {group.arabicYear}
+                  {locale === "ku" ? `ساڵی ${group.year}` : locale === "en" ? `Year ${group.year}` : `عام ${group.arabicYear}`}
                 </div>
                 <div className="h-0.5 flex-1 bg-gradient-to-l from-[#EBE3DA] to-[#D48C84]/30" />
                 <span className="text-[11px] text-[#7A6C68] font-medium">
                   {group.chapters.length}{" "}
-                  {group.chapters.length === 1 ? "ذكرى" : "ذكريات"}
+                  {locale === "ku" ? "یادەوەری" : locale === "en" ? "memories" : group.chapters.length === 1 ? "ذكرى" : "ذكريات"}
                 </span>
               </div>
 

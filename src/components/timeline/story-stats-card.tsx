@@ -1,6 +1,9 @@
+"use client";
+
 import { Heart, Calendar, BookOpen, Star, Image as ImageIcon } from "lucide-react";
 import type { Book, ChapterWithDetails } from "@/lib/types/database";
 import { calculateStoryStats } from "@/lib/timeline";
+import { useTranslation } from "@/lib/i18n/context";
 
 interface StoryStatsCardProps {
   book: Book;
@@ -9,9 +12,11 @@ interface StoryStatsCardProps {
 
 export function StoryStatsCard({ book, chapters }: StoryStatsCardProps) {
   const stats = calculateStoryStats(book.story_start_date, chapters);
+  const { dict, locale } = useTranslation();
 
+  const dateLocale = locale === "en" ? "en-US" : locale === "ku" ? "ckb" : "ar-EG";
   const startDateFormatted = new Date(book.story_start_date).toLocaleDateString(
-    "ar-EG",
+    dateLocale,
     {
       year: "numeric",
       month: "long",
@@ -41,11 +46,17 @@ export function StoryStatsCard({ book, chapters }: StoryStatsCardProps) {
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-[#7A6C68]">
             <span className="flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5 text-[#7C2D37]" />
-              <span>بداية القصة: {startDateFormatted}</span>
+              <span>
+                {locale === "ku" ? `دەستپێک: ${startDateFormatted}` : locale === "en" ? `Start date: ${startDateFormatted}` : `بداية القصة: ${startDateFormatted}`}
+              </span>
             </span>
             <span>•</span>
             <span className="font-semibold text-[#7C2D37]">
-              {stats.formattedDuration} من الحب المشترك
+              {locale === "ku"
+                ? `${stats.formattedDuration} لە خۆشەویستی هاوبەش`
+                : locale === "en"
+                ? `${stats.formattedDuration} of shared love`
+                : `${stats.formattedDuration} من الحب المشترك`}
             </span>
           </div>
         </div>
@@ -54,10 +65,10 @@ export function StoryStatsCard({ book, chapters }: StoryStatsCardProps) {
         <div className="flex items-center gap-4 bg-[#FAF7F2] border border-[#EBE3DA] rounded-2xl p-4 sm:px-6 sm:py-4 self-stretch md:self-auto justify-center">
           <div className="text-center">
             <div className="text-3xl sm:text-4xl font-extrabold text-[#7C2D37] tracking-tight font-sans">
-              {stats.totalDays.toLocaleString("ar-EG")}
+              {stats.totalDays.toLocaleString(dateLocale)}
             </div>
             <div className="text-xs font-medium text-[#7A6C68] mt-0.5">
-              يومًا في رحلتنا
+              {locale === "ku" ? "ڕۆژ لە گەشتەکەماندا" : locale === "en" ? "days on our journey" : "يومًا في رحلتنا"}
             </div>
           </div>
         </div>
@@ -71,9 +82,9 @@ export function StoryStatsCard({ book, chapters }: StoryStatsCardProps) {
           </div>
           <div>
             <div className="text-sm sm:text-base font-bold text-[#2D2321]">
-              {stats.totalChapters.toLocaleString("ar-EG")}
+              {stats.totalChapters.toLocaleString(dateLocale)}
             </div>
-            <div className="text-[11px] text-[#7A6C68]">فصل موثق</div>
+            <div className="text-[11px] text-[#7A6C68]">{dict.common.chapters}</div>
           </div>
         </div>
 
@@ -83,9 +94,9 @@ export function StoryStatsCard({ book, chapters }: StoryStatsCardProps) {
           </div>
           <div>
             <div className="text-sm sm:text-base font-bold text-[#2D2321]">
-              {stats.milestonesCount.toLocaleString("ar-EG")}
+              {stats.milestonesCount.toLocaleString(dateLocale)}
             </div>
-            <div className="text-[11px] text-[#7A6C68]">محطة فارقة</div>
+            <div className="text-[11px] text-[#7A6C68]">{dict.common.milestones}</div>
           </div>
         </div>
 
@@ -95,9 +106,9 @@ export function StoryStatsCard({ book, chapters }: StoryStatsCardProps) {
           </div>
           <div>
             <div className="text-sm sm:text-base font-bold text-[#2D2321]">
-              {stats.totalImagesCount.toLocaleString("ar-EG")}
+              {stats.totalImagesCount.toLocaleString(dateLocale)}
             </div>
-            <div className="text-[11px] text-[#7A6C68]">صورة محفوظة</div>
+            <div className="text-[11px] text-[#7A6C68]">{dict.common.photos}</div>
           </div>
         </div>
       </div>

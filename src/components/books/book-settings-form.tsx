@@ -18,6 +18,8 @@ import {
   type BookActionState,
 } from "@/actions/books";
 import type { BookWithMembers } from "@/lib/types/database";
+import { useTranslation } from "@/lib/i18n/context";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 interface BookSettingsFormProps {
   book: BookWithMembers;
@@ -31,14 +33,18 @@ const initialState: BookActionState = {
 
 export function BookSettingsForm({ book, currentUserId }: BookSettingsFormProps) {
   const router = useRouter();
-  const boundAction = updateBookAction.bind(null, book.id);
-  const [state, formAction, isPending] = useActionState(boundAction, initialState);
+  const { dict, locale } = useTranslation();
+  const updateActionWithId = updateBookAction.bind(null, book.id);
+  const [state, formAction, isPending] = useActionState(updateActionWithId, initialState);
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const isCreator = book.created_by === currentUserId;
+  const isCreator = book.members.some(
+    (m) => m.user_id === currentUserId && m.role === "creator"
+  );
+
   const today = new Date().toISOString().split("T")[0];
 
   const handleDeleteBook = async () => {
@@ -47,13 +53,14 @@ export function BookSettingsForm({ book, currentUserId }: BookSettingsFormProps)
     try {
       const res = await deleteBookAction(book.id);
       if (res.success) {
+        setShowDeleteModal(false);
         router.push("/");
       } else {
-        setDeleteError(res.error || "فشل حذف الكتاب.");
+        setDeleteError(res.error || (locale === "ku" ? "سڕینەوەی کتێب سەرکەوتوو نەبوو." : locale === "en" ? "Failed to delete book." : "فشل حذف الكتاب."));
         setIsDeleting(false);
       }
     } catch {
-      setDeleteError("حدث خطأ غير متوقع أثناء الحذف.");
+      setDeleteError(locale === "ku" ? "هەڵەیەکی چاوەڕواننەکراو ڕوویدا." : locale === "en" ? "An unexpected error occurred." : "حدث خطأ غير متوقع أثناء الحذف.");
       setIsDeleting(false);
     }
   };
@@ -66,9 +73,11 @@ export function BookSettingsForm({ book, currentUserId }: BookSettingsFormProps)
           href={`/book/${book.id}`}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#7A6C68] hover:text-[#7C2D37] transition-colors"
         >
-          <ArrowRight className="w-3.5 h-3.5" />
-          <span>العودة للكتاب</span>
+          <ArrowRight className={`w-3.5 h-3.5 ${locale === "en" ? "rotate-180" : ""}`} />
+          <span>{dict.print.backToBook}</span>
         </Link>
+
+        <LanguageSwitcher />
       </div>
 
       {/* Main Settings Card */}
@@ -80,10 +89,10 @@ export function BookSettingsForm({ book, currentUserId }: BookSettingsFormProps)
             <Settings className="w-6 h-6" />
           </div>
           <h1 className="text-2xl font-bold text-[#2D2321] tracking-tight">
-            إعدادات الكتاب
+            {dict.settings.title}
           </h1>
           <p className="text-xs sm:text-sm text-[#7A6C68] mt-1.5">
-            تعديل معلومات القصة المشتركة وأسماء الشريكين
+            {dict.settings.subtitle}
           </p>
         </div>
 
@@ -100,7 +109,7 @@ export function BookSettingsForm({ book, currentUserId }: BookSettingsFormProps)
               htmlFor="name"
               className="block text-xs font-semibold text-[#2D2321] mb-1.5"
             >
-              عنوان الكتاب
+              {dict.book.bookTitleLabel}
             </label>
             <input
               id="name"
@@ -120,7 +129,7 @@ export function BookSettingsForm({ book, currentUserId }: BookSettingsFormProps)
                 htmlFor="partner1_name"
                 className="block text-xs font-semibold text-[#2D2321] mb-1.5"
               >
-                اسم الشريك الأول
+                {dict.book.partner1Label}
               </label>
               <input
                 id="partner1_name"
@@ -138,7 +147,7 @@ export function BookSettingsForm({ book, currentUserId }: BookSettingsFormProps)
                 htmlFor="partner2_name"
                 className="block text-xs font-semibold text-[#2D2321] mb-1.5"
               >
-                اسم الشريك الثاني
+                {dict.book.partner2Label}
               </label>
               <input
                 id="partner2_name"
@@ -158,7 +167,7 @@ export function BookSettingsForm({ book, currentUserId }: BookSettingsFormProps)
               htmlFor="story_start_date"
               className="block text-xs font-semibold text-[#2D2321] mb-1.5"
             >
-              تاريخ بداية القصة
+              {dict.book.startDateLabel}
             </label>
             <input
               id="story_start_date"
@@ -170,7 +179,7 @@ export function BookSettingsForm({ book, currentUserId }: BookSettingsFormProps)
               className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#EBE3DA] text-[#2D2321] text-sm focus:bg-white focus:border-[#7C2D37] focus:ring-1 focus:ring-[#7C2D37] transition-all outline-hidden"
             />
             <p className="text-[11px] text-[#7A6C68] mt-1">
-              يُستخدم لحساب عداد الأيام والمحطات المشتركة
+              {dict.book.startDateHint}
             </p>
           </div>
 
@@ -186,7 +195,7 @@ export function BookSettingsForm({ book, currentUserId }: BookSettingsFormProps)
               ) : (
                 <Save className="w-4 h-4" />
               )}
-              <span>{isPending ? "جاري الحفظ..." : "حفظ التعديلات"}</span>
+              <span>{isPending ? dict.common.saving : dict.common.save}</span>
             </button>
           </div>
         </form>
@@ -196,7 +205,7 @@ export function BookSettingsForm({ book, currentUserId }: BookSettingsFormProps)
       <div className="bg-white rounded-3xl border border-[#EBE3DA] p-6 shadow-xs space-y-4">
         <div className="flex items-center gap-2 pb-3 border-b border-[#EBE3DA]">
           <Users className="w-5 h-5 text-[#7C2D37]" />
-          <h3 className="text-sm font-bold text-[#2D2321]">أعضاء هذا الكتاب</h3>
+          <h3 className="text-sm font-bold text-[#2D2321]">{dict.settings.membersSection}</h3>
         </div>
 
         <div className="space-y-3">
@@ -207,18 +216,21 @@ export function BookSettingsForm({ book, currentUserId }: BookSettingsFormProps)
             >
               <div className="space-y-0.5">
                 <div className="text-xs font-bold text-[#2D2321]">
-                  {member.profile?.display_name || "شريك"}
+                  {member.profile?.display_name || dict.common.partner}
                   {member.user_id === currentUserId && (
-                    <span className="text-[#7C2D37] ms-1.5 font-normal">(أنت)</span>
+                    <span className="text-[#7C2D37] ms-1.5 font-normal">
+                      {locale === "ku" ? "(تۆ)" : locale === "en" ? "(You)" : "(أنت)"}
+                    </span>
                   )}
                 </div>
                 <div className="text-[10px] text-[#7A6C68]">
-                  انضم في: {new Date(member.joined_at).toLocaleDateString("ar-EG")}
+                  {locale === "ku" ? "بەشداریکردن: " : locale === "en" ? "Joined: " : "انضم في: "}
+                  {new Date(member.joined_at).toLocaleDateString(locale === "en" ? "en-US" : locale === "ku" ? "ckb" : "ar-EG")}
                 </div>
               </div>
 
               <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-white border border-[#EBE3DA] text-[#7C2D37]">
-                {member.role === "creator" ? "منشئ الكتاب" : "الشريك"}
+                {member.role === "creator" ? dict.common.creator : dict.common.partner}
               </span>
             </div>
           ))}
@@ -230,11 +242,11 @@ export function BookSettingsForm({ book, currentUserId }: BookSettingsFormProps)
         <div className="bg-[#FDEDEC]/60 rounded-3xl border border-[#F5B7B1] p-6 shadow-xs space-y-4">
           <div className="flex items-center gap-2 text-[#922B21]">
             <ShieldAlert className="w-5 h-5" />
-            <h3 className="text-sm font-bold">منطقة الحذر</h3>
+            <h3 className="text-sm font-bold">{dict.settings.dangerSection}</h3>
           </div>
 
           <p className="text-xs text-[#7A6C68] leading-relaxed">
-            حذف الكتاب سيؤدي إلى حذف جميع فصول الذكريات والصور المرفقة نهائيًا وبشكل لا يمكن استرجاعه.
+            {dict.settings.deleteBookWarning}
           </p>
 
           <button
@@ -243,7 +255,7 @@ export function BookSettingsForm({ book, currentUserId }: BookSettingsFormProps)
             className="px-4 py-2 rounded-xl bg-[#922B21] hover:bg-[#78231B] text-white text-xs font-semibold transition-colors shadow-2xs inline-flex items-center gap-1.5"
           >
             <Trash2 className="w-3.5 h-3.5" />
-            <span>حذف هذا الكتاب نهائيًا</span>
+            <span>{dict.settings.deleteConfirmButton}</span>
           </button>
         </div>
       )}
@@ -257,12 +269,15 @@ export function BookSettingsForm({ book, currentUserId }: BookSettingsFormProps)
             </div>
 
             <h3 className="text-base font-bold text-[#2D2321] text-center mb-2">
-              تأكيد حذف الكتاب نهائيًا
+              {locale === "ku" ? "دووپاتکردنەوەی سڕینەوەی هەمیشەیی کتێب" : locale === "en" ? "Confirm Permanent Book Deletion" : "تأكيد حذف الكتاب نهائيًا"}
             </h3>
 
             <p className="text-xs text-[#7A6C68] text-center leading-relaxed mb-6">
-              هل أنت متأكد من رغبتك في حذف كتاب <strong>«{book.name}»</strong>؟
-              سيتم حذف كافة الفصول والصور وسجلات الشركاء فورًا وبشكل دائم.
+              {locale === "ku"
+                ? `ئایا دڵنیایت لە سڕینەوەی کتێبی «${book.name}»؟ هەموو بەشەکان، وێنەکان و تۆماری هاوبەشەکان دەستبەجێ بۆ هەمیشە دەسڕێنەوە.`
+                : locale === "en"
+                ? `Are you sure you want to delete «${book.name}»? All chapters, photos, and partner records will be permanently removed immediately.`
+                : `هل أنت متأكد من رغبتك في حذف كتاب «${book.name}»؟ سيتم حذف كافة الفصول والصور وسجلات الشركاء فورًا وبشكل دائم.`}
             </p>
 
             {deleteError && (
@@ -278,7 +293,7 @@ export function BookSettingsForm({ book, currentUserId }: BookSettingsFormProps)
                 disabled={isDeleting}
                 className="flex-1 py-2.5 px-4 rounded-xl bg-[#FAF7F2] hover:bg-[#F0ECE6] text-[#2D2321] text-xs font-semibold transition-colors disabled:opacity-50"
               >
-                إلغاء
+                {dict.common.cancel}
               </button>
               <button
                 type="button"
@@ -286,7 +301,7 @@ export function BookSettingsForm({ book, currentUserId }: BookSettingsFormProps)
                 disabled={isDeleting}
                 className="flex-1 py-2.5 px-4 rounded-xl bg-[#922B21] hover:bg-[#78231B] text-white text-xs font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
-                {isDeleting ? "جاري الحذف..." : "نعم، احذف الكتاب"}
+                {isDeleting ? dict.common.deleting : dict.common.delete}
               </button>
             </div>
           </div>

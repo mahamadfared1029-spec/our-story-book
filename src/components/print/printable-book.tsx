@@ -14,6 +14,8 @@ import {
 import type { Book, ChapterWithDetails } from "@/lib/types/database";
 import { MILESTONE_TYPES } from "@/lib/types/database";
 import { formatArabicDate, calculateStoryStats } from "@/lib/timeline";
+import { useTranslation } from "@/lib/i18n/context";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 interface PrintableBookProps {
   book: Book;
@@ -21,13 +23,16 @@ interface PrintableBookProps {
 }
 
 export function PrintableBook({ book, chapters }: PrintableBookProps) {
+  const { dict, locale } = useTranslation();
+
   const sortedChapters = [...chapters].sort(
     (a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime()
   );
 
   const stats = calculateStoryStats(book.story_start_date, sortedChapters);
+  const dateLocale = locale === "en" ? "en-US" : locale === "ku" ? "ckb" : "ar-EG";
   const formattedStartDate = new Date(book.story_start_date).toLocaleDateString(
-    "ar-EG",
+    dateLocale,
     {
       year: "numeric",
       month: "long",
@@ -49,23 +54,25 @@ export function PrintableBook({ book, chapters }: PrintableBookProps) {
               href={`/book/${book.id}`}
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#7A6C68] hover:text-[#7C2D37] px-3 py-1.5 rounded-xl hover:bg-black/5 transition-colors"
             >
-              <ArrowRight className="w-4 h-4" />
-              <span>العودة للكتاب</span>
+              <ArrowRight className={`w-3.5 h-3.5 ${locale === "en" ? "rotate-180" : ""}`} />
+              <span>{dict.print.backToBook}</span>
             </Link>
 
             <span className="text-xs font-bold text-[#7C2D37]">
-              تجهيز الكتاب للطباعة و PDF
+              {dict.print.toolbarTitle}
             </span>
           </div>
 
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
+
             <button
               type="button"
               onClick={handlePrint}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#7C2D37] text-white text-xs font-semibold hover:bg-[#67222B] transition-all shadow-xs active:scale-[0.98]"
             >
               <Printer className="w-4 h-4" />
-              <span>طباعة / حفظ كملف PDF</span>
+              <span>{dict.print.printButton}</span>
             </button>
           </div>
         </div>
@@ -74,7 +81,7 @@ export function PrintableBook({ book, chapters }: PrintableBookProps) {
         <div className="max-w-4xl mx-auto mt-3 p-3 rounded-xl bg-[#FAF0EE] border border-[#E8C2BF] text-xs text-[#7C2D37] flex items-start gap-2">
           <Info className="w-4 h-4 shrink-0 mt-0.5" />
           <p className="leading-relaxed">
-            <strong>نصيحة للحصول على أفضل جودة:</strong> عند فتح نافذة الطباعة، اختر الوجهة <strong>«حفظ بتنسيق PDF»</strong>، وتأكد من تفعيل خيار <strong>«رسومات الخلفية (Background Graphics)»</strong> ضمن المزيد من الإعدادات لتظهر الألوان والإطارات الدافئة بدقة.
+            <strong>{dict.print.tipsTitle}</strong> {dict.print.tipGraphics} {dict.print.tipMargins}
           </p>
         </div>
       </aside>
@@ -94,7 +101,7 @@ export function PrintableBook({ book, chapters }: PrintableBookProps) {
             </div>
 
             <p className="text-xs text-[#7A6C68] tracking-widest uppercase">
-              كتاب الذكريات والقصة المشتركة
+              {locale === "ku" ? "کتێبی یادەوەری و چیرۆکی هاوبەشمان" : locale === "en" ? "Book of Memories & Our Shared Story" : "كتاب الذكريات والقصة المشتركة"}
             </p>
           </div>
 
@@ -110,14 +117,24 @@ export function PrintableBook({ book, chapters }: PrintableBookProps) {
             <div className="w-32 h-1 bg-[#7C2D37] mx-auto rounded-full" />
 
             <p className="text-sm text-[#7A6C68] max-w-md mx-auto leading-loose italic font-serif">
-              «كل قصة حب هي حكاية خاصة.. وهذه حكايتنا التي خططنا تفاصيلها معًا يومًا بعد يوم.»
+              {locale === "ku"
+                ? "«هەموو چیرۆکێکی خۆشەویستی بەسەرهاتێکی تایبەتە.. ئەمەش حیکایەتی ئێمەیە کە وردەکارییەکانیمان پێکەوە ڕۆژ بە ڕۆژ نەخشاند.»"
+                : locale === "en"
+                ? "“Every love story is special.. and this is our journey, designed together day by day.”"
+                : "«كل قصة حب هي حكاية خاصة.. وهذه حكايتنا التي خططنا تفاصيلها معًا يومًا بعد يوم.»"}
             </p>
           </div>
 
           <div className="pb-8 space-y-2 text-xs text-[#7A6C68] border-t border-[#EBE3DA] pt-6">
-            <div>تاريخ بداية القصة: {formattedStartDate}</div>
+            <div>
+              {locale === "ku" ? `بەرواری دەستپێک: ${formattedStartDate}` : locale === "en" ? `Start date: ${formattedStartDate}` : `تاريخ بداية القصة: ${formattedStartDate}`}
+            </div>
             <div className="font-semibold text-[#7C2D37]">
-              {stats.formattedDuration} من المحبة والوفاء
+              {locale === "ku"
+                ? `${stats.formattedDuration} لە خۆشەویستی و وەفاداری`
+                : locale === "en"
+                ? `${stats.formattedDuration} of love & devotion`
+                : `${stats.formattedDuration} من المحبة والوفاء`}
             </div>
           </div>
         </section>
@@ -131,14 +148,12 @@ export function PrintableBook({ book, chapters }: PrintableBookProps) {
               <Sparkles className="w-6 h-6" />
             </div>
 
-            <h2 className="text-2xl font-bold text-[#2D2321]">إهداء خاص</h2>
+            <h2 className="text-2xl font-bold text-[#2D2321]">
+              {dict.reader.dedication}
+            </h2>
 
             <blockquote className="text-base text-[#4A3E3D] italic leading-loose font-serif">
-              «إلى من جعل للحياة طعمًا أبهى وللأيام معنى أجمل..
-              <br /><br />
-              إلى الخطوات التي مشيناها معًا، والضحكات التي تشاركناها، والتحديات التي تجاوزناها يدًا بيد.
-              <br /><br />
-              هذا الكتاب يجمع بين دفتيه تفاصيل قصتنا التي لن تشيخ في الذاكرة أبدًا.»
+              «{dict.reader.dedicationText}»
             </blockquote>
 
             <div className="text-sm font-bold text-[#7C2D37]">
@@ -152,9 +167,9 @@ export function PrintableBook({ book, chapters }: PrintableBookProps) {
         {/* ================================================================== */}
         <section className="min-h-[297mm] p-[20mm] flex flex-col justify-start break-after-page bg-white">
           <div className="text-center pb-6 border-b-2 border-[#7C2D37]/30 mb-8">
-            <h2 className="text-2xl font-bold text-[#2D2321]">فهرس الذكريات</h2>
+            <h2 className="text-2xl font-bold text-[#2D2321]">{dict.reader.contents}</h2>
             <p className="text-xs text-[#7A6C68] mt-1">
-              ترتيب الفصول حسب التسلسل الزمني للأحداث
+              {locale === "ku" ? "ڕێکخستنی بەشەکان بەپێی کاتی ڕوودانیان" : locale === "en" ? "Chapters arranged chronologically" : "ترتيب الفصول حسب التسلسل الزمني للأحداث"}
             </p>
           </div>
 
@@ -169,20 +184,20 @@ export function PrintableBook({ book, chapters }: PrintableBookProps) {
                   <span className="font-semibold text-[#2D2321]">{chapter.title}</span>
                   {chapter.is_milestone && (
                     <span className="text-[10px] text-[#B9770E] font-medium bg-[#FEF9E7] px-2 py-0.5 rounded-full">
-                      محطة فارقة
+                      ★
                     </span>
                   )}
                 </div>
 
                 <div className="text-[#7A6C68] font-sans">
-                  {new Date(chapter.event_date).toLocaleDateString("ar-EG")}
+                  {new Date(chapter.event_date).toLocaleDateString(dateLocale)}
                 </div>
               </div>
             ))}
           </div>
 
           <div className="text-center text-[10px] text-[#A89F91] pt-6 border-t border-[#EBE3DA]">
-            {book.name} — صفحة ٣
+            {book.name} — {dict.reader.page} ٣
           </div>
         </section>
 
@@ -204,7 +219,7 @@ export function PrintableBook({ book, chapters }: PrintableBookProps) {
                 <div className="pb-4 border-b border-[#EBE3DA] flex items-center justify-between gap-4">
                   <div>
                     <span className="text-xs font-bold text-[#7C2D37]">
-                      الفصل {idx + 1}
+                      {locale === "ku" ? `بەشی ${idx + 1}` : locale === "en" ? `Chapter ${idx + 1}` : `الفصل ${idx + 1}`}
                     </span>
                     <h2 className="text-2xl font-bold text-[#2D2321] mt-1">
                       {chapter.title}
@@ -272,12 +287,12 @@ export function PrintableBook({ book, chapters }: PrintableBookProps) {
               {/* Chapter Page Footer */}
               <div className="pt-6 border-t border-[#EBE3DA] flex items-center justify-between text-[11px] text-[#7A6C68]">
                 <span>
-                  بقلم:{" "}
+                  {locale === "ku" ? "بە قەڵەمی: " : locale === "en" ? "Written by: " : "بقلم: "}
                   <strong className="text-[#2D2321]">
-                    {chapter.authorProfile?.display_name || "الشريك"}
+                    {chapter.authorProfile?.display_name || dict.common.partner}
                   </strong>
                 </span>
-                <span className="font-sans">صفحة {4 + idx}</span>
+                <span className="font-sans">{dict.reader.page} {4 + idx}</span>
               </div>
             </section>
           );
@@ -293,11 +308,15 @@ export function PrintableBook({ book, chapters }: PrintableBookProps) {
             </div>
 
             <h3 className="text-3xl font-extrabold text-[#2D2321]">
-              نهاية الجزء الأول.. والقصة مستمرة
+              {locale === "ku" ? "کۆتایی بەشی یەکەم.. و چیرۆکەکە بەردەوامە" : locale === "en" ? "End of Volume One.. and the Story Continues" : "نهاية الجزء الأول.. والقصة مستمرة"}
             </h3>
 
             <p className="text-sm text-[#7A6C68] leading-loose">
-              كل يوم نعيشه معًا هو صفحة جديدة تُكتب في كتاب عمرنا. شكرًا لكل لحظة جعلت من هذه الحكاية أجمل قصة في الوجود.
+              {locale === "ku"
+                ? "هەموو ڕۆژێک کە پێکەوە دەژین، لاپەڕەیەکی نوێیە لە کتێبی ژیانمان. سوپاس بۆ هەموو ساتێک کە ئەم حیکایەتەی کرد بە جوانترین چیرۆکی بوون."
+                : locale === "en"
+                ? "Every day we live together is a new page written in the book of our lives. Thank you for every moment that made this the most beautiful story."
+                : "كل يوم نعيشه معًا هو صفحة جديدة تُكتب في كتاب عمرنا. شكرًا لكل لحظة جعلت من هذه الحكاية أجمل قصة في الوجود."}
             </p>
 
             <div className="pt-6 border-t border-[#EBE3DA]">
@@ -305,7 +324,7 @@ export function PrintableBook({ book, chapters }: PrintableBookProps) {
                 {book.partner1_name} &amp; {book.partner2_name}
               </div>
               <div className="text-xs text-[#7A6C68] mt-1 font-sans">
-                {new Date().getFullYear().toLocaleString("ar-EG", { useGrouping: false })}
+                {new Date().getFullYear().toLocaleString(dateLocale, { useGrouping: false })}
               </div>
             </div>
           </div>

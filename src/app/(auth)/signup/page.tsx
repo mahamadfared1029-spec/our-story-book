@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { Sparkles, Lock, Mail, User, ArrowRight } from "lucide-react";
 import { signUpAction, type AuthState } from "@/actions/auth";
+import { useTranslation } from "@/lib/i18n/context";
 
 const initialState: AuthState = {
   error: null,
@@ -12,6 +13,7 @@ const initialState: AuthState = {
 
 export default function SignUpPage() {
   const [state, formAction, isPending] = useActionState(signUpAction, initialState);
+  const { dict, locale } = useTranslation();
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
@@ -24,10 +26,10 @@ export default function SignUpPage() {
             <Sparkles className="w-6 h-6" />
           </div>
           <h1 className="text-2xl font-bold text-[#2D2321] tracking-tight">
-            ابدآ رحلتكما معًا
+            {dict.auth.signupTitle}
           </h1>
           <p className="text-sm text-[#7A6C68] mt-1.5">
-            أنشئ حسابك لتوثيق كل لحظة جميلة في كتابكما الخاص
+            {dict.auth.signupSubtitle}
           </p>
         </div>
 
@@ -49,7 +51,7 @@ export default function SignUpPage() {
               htmlFor="displayName"
               className="block text-xs font-semibold text-[#2D2321] mb-1.5"
             >
-              اسمك المعروض
+              {dict.auth.displayNameLabel}
             </label>
             <div className="relative">
               <input
@@ -57,13 +59,13 @@ export default function SignUpPage() {
                 name="displayName"
                 type="text"
                 required
-                placeholder="مثال: يوسف أو مريم"
+                placeholder={dict.auth.displayNamePlaceholder}
                 className="w-full px-3.5 py-2.5 ps-10 rounded-xl bg-[#FAF7F2] border border-[#EBE3DA] text-[#2D2321] text-sm focus:bg-white focus:border-[#7C2D37] focus:ring-1 focus:ring-[#7C2D37] transition-all outline-hidden"
               />
               <User className="w-4 h-4 text-[#7A6C68] absolute start-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
             <p className="text-[11px] text-[#7A6C68] mt-1">
-              هذا الاسم سيظهر لشريكك داخل الكتاب
+              {locale === "ku" ? "ئەم ناوە بۆ هاوبەشەکەت دەردەکەوێت لەناو کتێبەکەدا" : locale === "en" ? "This name will appear to your partner inside the book" : "هذا الاسم سيظهر لشريكك داخل الكتاب"}
             </p>
           </div>
 
@@ -72,7 +74,7 @@ export default function SignUpPage() {
               htmlFor="email"
               className="block text-xs font-semibold text-[#2D2321] mb-1.5"
             >
-              البريد الإلكتروني
+              {dict.auth.emailLabel}
             </label>
             <div className="relative">
               <input
@@ -81,7 +83,7 @@ export default function SignUpPage() {
                 type="email"
                 required
                 autoComplete="email"
-                placeholder="name@example.com"
+                placeholder={dict.auth.emailPlaceholder}
                 className="w-full px-3.5 py-2.5 ps-10 rounded-xl bg-[#FAF7F2] border border-[#EBE3DA] text-[#2D2321] text-sm focus:bg-white focus:border-[#7C2D37] focus:ring-1 focus:ring-[#7C2D37] transition-all outline-hidden"
               />
               <Mail className="w-4 h-4 text-[#7A6C68] absolute start-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -93,7 +95,7 @@ export default function SignUpPage() {
               htmlFor="password"
               className="block text-xs font-semibold text-[#2D2321] mb-1.5"
             >
-              كلمة المرور
+              {dict.auth.passwordLabel}
             </label>
             <div className="relative">
               <input
@@ -109,7 +111,7 @@ export default function SignUpPage() {
               <Lock className="w-4 h-4 text-[#7A6C68] absolute start-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
             <p className="text-[11px] text-[#7A6C68] mt-1">
-              8 أحرف على الأقل لحماية خصوصيتكما
+              {locale === "ku" ? "لانی کەم ٨ پیت بۆ پاراستنی تایبەتمەندیتان" : locale === "en" ? "At least 8 characters to protect your privacy" : "8 أحرف على الأقل لحماية خصوصيتكما"}
             </p>
           </div>
 
@@ -121,18 +123,18 @@ export default function SignUpPage() {
             {isPending ? (
               <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : null}
-            <span>{isPending ? "جارٍ إنشاء الحساب..." : "إنشاء الحساب والبدء"}</span>
+            <span>{isPending ? dict.common.loading : dict.auth.signupButton}</span>
           </button>
         </form>
 
         <div className="mt-8 pt-6 border-t border-[#EBE3DA] text-center text-xs text-[#7A6C68]">
-          لديكما حساب بالفعل؟{" "}
+          {dict.auth.haveAccount}{" "}
           <Link
             href="/login"
             className="text-[#7C2D37] font-bold hover:underline inline-flex items-center gap-1"
           >
-            تسجيل الدخول
-            <ArrowRight className="w-3 h-3 rotate-180" />
+            {dict.common.login}
+            <ArrowRight className={`w-3 h-3 ${locale === "en" ? "" : "rotate-180"}`} />
           </Link>
         </div>
       </div>

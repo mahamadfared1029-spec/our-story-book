@@ -16,6 +16,8 @@ import { InviteManager } from "@/components/books/invite-manager";
 import { StoryStatsCard } from "@/components/timeline/story-stats-card";
 import { MemoryPromptsBar } from "@/components/timeline/memory-prompts-bar";
 import { StoryTimeline } from "@/components/timeline/story-timeline";
+import { getDictionary, SUPPORTED_LOCALES } from "@/lib/i18n";
+import { getCurrentLocale } from "@/lib/i18n/server";
 
 interface BookPageProps {
   params: Promise<{ id: string }>;
@@ -29,14 +31,18 @@ export default async function BookPage({ params }: BookPageProps) {
     redirect(`/login?returnUrl=/book/${id}`);
   }
 
-  const [book, chapters] = await Promise.all([
+  const [book, chapters, locale] = await Promise.all([
     getBookDetails(id),
     getBookChaptersWithImages(id),
+    getCurrentLocale(),
   ]);
 
   if (!book) {
     notFound();
   }
+
+  const dict = getDictionary(locale);
+  const config = SUPPORTED_LOCALES[locale];
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF7F2]">
@@ -49,8 +55,8 @@ export default async function BookPage({ params }: BookPageProps) {
             href="/"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#7A6C68] hover:text-[#7C2D37] transition-colors"
           >
-            <ArrowRight className="w-3.5 h-3.5" />
-            <span>العودة لكتبي</span>
+            <ArrowRight className={`w-3.5 h-3.5 ${config.dir === "ltr" ? "rotate-180" : ""}`} />
+            <span>{dict.nav.myBooks}</span>
           </Link>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -59,7 +65,7 @@ export default async function BookPage({ params }: BookPageProps) {
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-[#EBE3DA] text-[#7C2D37] text-xs font-semibold hover:bg-[#FAF0EE] transition-all shadow-2xs"
             >
               <BookOpen className="w-3.5 h-3.5" />
-              <span>تصفح ككتاب رقمي</span>
+              <span>{dict.nav.previewBook}</span>
             </Link>
 
             <Link
@@ -67,13 +73,13 @@ export default async function BookPage({ params }: BookPageProps) {
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-[#EBE3DA] text-[#7A6C68] hover:text-[#7C2D37] text-xs font-semibold hover:bg-[#FAF0EE] transition-all shadow-2xs"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>تصدير PDF / طباعة</span>
+              <span>{dict.nav.printBook}</span>
             </Link>
 
             <Link
               href={`/book/${book.id}/settings`}
               className="p-2 rounded-xl bg-white border border-[#EBE3DA] text-[#7A6C68] hover:text-[#7C2D37] hover:bg-[#FAF0EE] transition-all shadow-2xs"
-              title="إعدادات الكتاب"
+              title={dict.nav.settings}
             >
               <Settings className="w-4 h-4" />
             </Link>
@@ -83,7 +89,7 @@ export default async function BookPage({ params }: BookPageProps) {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#7C2D37] text-white text-xs font-semibold hover:bg-[#67222B] transition-all shadow-xs"
             >
               <Plus className="w-4 h-4" />
-              <span>إضافة فصل جديد</span>
+              <span>{dict.chapter.newTitle}</span>
             </Link>
           </div>
         </div>
@@ -116,10 +122,10 @@ export default async function BookPage({ params }: BookPageProps) {
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <h4 className="text-xs font-bold text-[#2D2321]">
-                  سر استمرار الحكايات الجميلة
+                  {locale === "ku" ? "نهێنی مانەوەی چیرۆکە جوانەکان" : locale === "en" ? "The Secret of Timeless Love Stories" : "سر استمرار الحكايات الجميلة"}
                 </h4>
                 <p className="text-[11px] text-[#7A6C68] leading-relaxed">
-                  «الذكريات المشتركة هي الكنز الذي لا ينفد.. كل كلمة وصورة توثقانها اليوم ستكون أغلى هدية تقرآنها معًا بعد سنوات.»
+                  {locale === "ku" ? "«یادەوەرییە هاوبەشەکان گەنجینەیەکن کە هەرگیز کۆتایی نایەت.. هەموو وشە و وێنەیەک کە ئەمڕۆ تۆماری دەکەن، دەبێتە بەنرخترین دیاری کە دوای ساڵانێک پێکەوە دەیخوێننەوە.»" : locale === "en" ? "“Shared memories are an everlasting treasure.. every word and photo you capture today will become the most precious gift you read together years from now.”" : "«الذكريات المشتركة هي الكنز الذي لا ينفد.. كل كلمة وصورة توثقانها اليوم ستكون أغلى هدية تقرآنها معًا بعد سنوات.»"}
                 </p>
               </div>
             </div>
