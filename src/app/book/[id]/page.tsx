@@ -5,6 +5,7 @@ import {
   Plus,
   Sparkles,
   BookOpen,
+  Printer,
 } from "lucide-react";
 import { getBookDetails } from "@/actions/books";
 import { getBookChaptersWithImages } from "@/actions/chapters";
@@ -51,13 +52,21 @@ export default async function BookPage({ params }: BookPageProps) {
             <span>العودة لكتبي</span>
           </Link>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Link
               href={`/book/${book.id}/preview`}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-[#EBE3DA] text-[#7C2D37] text-xs font-semibold hover:bg-[#FAF0EE] transition-all shadow-2xs"
             >
               <BookOpen className="w-3.5 h-3.5" />
               <span>تصفح ككتاب رقمي</span>
+            </Link>
+
+            <Link
+              href={`/book/${book.id}/print`}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-[#EBE3DA] text-[#7A6C68] hover:text-[#7C2D37] text-xs font-semibold hover:bg-[#FAF0EE] transition-all shadow-2xs"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>تصدير PDF / طباعة</span>
             </Link>
 
             <Link
