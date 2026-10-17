@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cairo, Tajawal } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/i18n/context";
@@ -17,11 +17,25 @@ const tajawal = Tajawal({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#7C2D37",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export const metadata: Metadata = {
   title: "كتاب قصتنا — کتێبی چیرۆکمان — Our Story Book",
   description: "مساحة خاصة لشخصين لتوثيق قصتهما المشتركة وحفظ أجمل الذكريات في كتاب رقمي دافئ",
+  manifest: "/manifest.webmanifest",
   icons: {
     icon: "/favicon.ico",
+    apple: "/icons/icon-192.png",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "كتاب قصتنا",
   },
 };
 
