@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Plus,
   Sparkles,
+  BookOpen,
 } from "lucide-react";
 import { getBookDetails } from "@/actions/books";
 import { getBookChaptersWithImages } from "@/actions/chapters";
@@ -41,7 +42,7 @@ export default async function BookPage({ params }: BookPageProps) {
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-8 space-y-8">
         {/* Top Navigation */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#7A6C68] hover:text-[#7C2D37] transition-colors"
@@ -50,13 +51,23 @@ export default async function BookPage({ params }: BookPageProps) {
             <span>العودة لكتبي</span>
           </Link>
 
-          <Link
-            href={`/book/${book.id}/chapters/new`}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#7C2D37] text-white text-xs font-semibold hover:bg-[#67222B] transition-all shadow-xs"
-          >
-            <Plus className="w-4 h-4" />
-            <span>إضافة فصل جديد</span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/book/${book.id}/preview`}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-[#EBE3DA] text-[#7C2D37] text-xs font-semibold hover:bg-[#FAF0EE] transition-all shadow-2xs"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>تصفح ككتاب رقمي</span>
+            </Link>
+
+            <Link
+              href={`/book/${book.id}/chapters/new`}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#7C2D37] text-white text-xs font-semibold hover:bg-[#67222B] transition-all shadow-xs"
+            >
+              <Plus className="w-4 h-4" />
+              <span>إضافة فصل جديد</span>
+            </Link>
+          </div>
         </div>
 
         {/* Story Stats & Days Elapsed Header */}
